@@ -1,10 +1,13 @@
 import java.text.DecimalFormat;
 
-public class ComplexNum extends MatrixDigits {
+public class ComplexNum {
     //Colorize
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_RED = "\u001B[31m";
+    private Double realPart = 0.0;
+    private Double imagPart = 0.0;
     String symbol = "i";
+
 
     @Override
     public String toString() {
@@ -16,6 +19,10 @@ public class ComplexNum extends MatrixDigits {
     public ComplexNum(Double realPart, Double imagPart) {
         this.realPart = realPart;
         this.imagPart = imagPart;
+    }
+
+    public ComplexNum(Double realPart) {
+        this.realPart = realPart;
     }
 
     public ComplexNum(String num) {
@@ -34,29 +41,27 @@ public class ComplexNum extends MatrixDigits {
         }
 
     }
-    @Override
-    public MatrixDigits addition (MatrixDigits operand) {
+
+    public ComplexNum addition (ComplexNum operand) {
         this.realPart += operand.realPart;
         this.imagPart +=  operand.imagPart;
         return this;
     }
 
-    @Override
-    public MatrixDigits subtraction(MatrixDigits operand) {
+    public ComplexNum subtraction(ComplexNum operand) {
         this.realPart -= operand.realPart;
         this.imagPart -= operand.imagPart;
         return this;
     }
 
-    @Override
-    public MatrixDigits multiplication(MatrixDigits operand) {
+    public ComplexNum multiplication(ComplexNum operand) {
         ComplexNum num1 = new ComplexNum(this.realPart * operand.realPart, this.realPart * operand.imagPart);
         ComplexNum num2 = new ComplexNum((this.imagPart * operand.imagPart) * -1, this.imagPart * operand.realPart);
         return num1.addition(num2);
     }
 
-    @Override
-    public MatrixDigits divide(MatrixDigits operand) {
+
+    public ComplexNum divide(ComplexNum operand) {
         double real2 = operand.realPart;
         double image2 = operand.imagPart;
         double newReal = (realPart*real2 + imagPart*image2)/(real2*real2 + image2*image2);
@@ -64,6 +69,20 @@ public class ComplexNum extends MatrixDigits {
         return new ComplexNum(newReal,newImage);
     }
 
+    public Double getRealPart() {
+        return realPart;
+    }
 
+    public void setRealPart(Double realPart) {
+        this.realPart = realPart;
+    }
+
+    public Double getImagPart() {
+        return imagPart;
+    }
+
+    public void setImagPart(Double imagPart) {
+        this.imagPart = imagPart;
+    }
 
 }

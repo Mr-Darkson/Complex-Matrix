@@ -4,34 +4,26 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Matrix<T extends MatrixDigits> {
-    private final Class<? extends MatrixDigits> cls;
-    private MatrixDigits[][] curMatrix;
+public class Matrix implements Cloneable{
+    private ComplexNum[][] curMatrix;
     private int xSize;
     private int ySize;
 
-    public Matrix(int xSize, int ySize, Class<? extends MatrixDigits> cls) {
+    public Matrix(int xSize, int ySize) {
         this.xSize = xSize;
         this.ySize = ySize;
-        this.cls = cls;
-        curMatrix = (T[][]) Array.newInstance(cls, ySize, xSize);
+        curMatrix = new ComplexNum[ySize][xSize];
         for (int i = 0; i < ySize; i++) {
             for (int j = 0; j < xSize; j++) {
-                if (cls.getName() == "ComplexNum") {
-                    curMatrix[i][j] = new ComplexNum(0.0, 0.0);
-                } else if (cls.getName() == "RealNum") {
-                    curMatrix[i][j] = new RealNum(0.0);
-                } else {
-                    curMatrix[i][j] = new MatrixDigits(0.0);
-                }
-                MatrixDigits point = curMatrix[i][j];
+                curMatrix[i][j] = new ComplexNum(0.0, 0.0);
             }
         }
     }
 
-    public Matrix(MatrixDigits[][] curMatrix, Class<? extends MatrixDigits> cls) {
+    public Matrix(ComplexNum[][] curMatrix) {
         this.curMatrix = curMatrix;
-        this.cls = cls;
+        ySize = curMatrix.length;
+        xSize = curMatrix[0].length;
     }
 
     @Override
@@ -46,7 +38,7 @@ public class Matrix<T extends MatrixDigits> {
         return builder.toString();
     }
 
-    public void setByIndex(int x, int y, MatrixDigits num) {
+    public void setByIndex(int x, int y, ComplexNum num) {
         curMatrix[y][x] = num;
     }
 
@@ -77,31 +69,84 @@ public class Matrix<T extends MatrixDigits> {
     public void transposition() {
         for (int y = 0; y < ySize; y++) {
             for (int x = y; x < xSize; x++) {
-                MatrixDigits tmp = curMatrix[y][x];
+                ComplexNum tmp = curMatrix[y][x];
                 curMatrix[y][x] = curMatrix[x][y];
                 curMatrix[x][y] = tmp;
             }
         }
     }
 
-    public Matrix multiplication(Matrix<T> matrixB) { // RealNum/ComplexNum
+    public Matrix multiplication(Matrix matrixB) { // ComplexNum
         if (this.xSize == matrixB.xSize && this.ySize == matrixB.ySize) {
-            MatrixDigits[][] tmpMatrix = (T[][]) Array.newInstance(matrixB.getClass(), xSize, ySize);
+            ComplexNum[][] tmpMatrix = new ComplexNum[ySize][xSize];
             for(int yFin = 0; yFin < ySize; yFin++) {
                 for(int xFin = 0; xFin < xSize; xFin++) {
-                    MatrixDigits finCalc =
-                            (matrixB.getClass().getName().equals("ComplexNum") ? new ComplexNum(0.0, 0.0) : new RealNum(0.0));
+                    ComplexNum finCalc = new ComplexNum(0.0, 0.0);
                     for(int xRuner = 0, yRunner = 0; xRuner < xSize; xRuner++, yRunner++) {
                         finCalc.addition(curMatrix[yFin][xRuner].multiplication(matrixB.curMatrix[yRunner][xFin]));
                     }
                     tmpMatrix[yFin][xFin] = finCalc;
                 }
             }
-            return new Matrix(tmpMatrix, cls);
+            return new Matrix(tmpMatrix);
         } else {
             System.out.println("Matrix should have the same size");
             return this;
         }
+    }
+
+    private void getCofactor(ComplexNum[][] mat, ComplexNum[][] temp,
+                            int p, int q, int n)
+    {
+        int i = 0, j = 0;
+
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < n; col++) {
+
+                if (row != p && col != q) {
+                    if(temp[i][j] == null) {
+                        temp[i][j] = new ComplexNum(0.00);
+                    }
+                    temp[i][j++].setRealPart(mat[row][col].getRealPart());
+
+                    if (j == n - 1) {
+                        j = 0;
+                        i++;
+                    }
+                }
+            }
+        }
+    }
+    private ComplexNum determinantOfMatrix(ComplexNum[][] mat, int n)
+    {
+        ComplexNum D = new ComplexNum(0.0);
+
+        if (n == 1)
+            return mat[0][0];
+
+        ComplexNum[][] temp = new ComplexNum[ySize][ySize];
+        ComplexNum sign = new ComplexNum(1.0);
+
+        for (int f = 0; f < n; f++) {
+            getCofactor(mat, temp, 0, f, n);
+            D.addition(sign.multiplication(mat[0][f]).multiplication(determinantOfMatrix(temp, n - 1)));
+
+            sign.setRealPart(-1 * sign.getRealPart());
+        }
+
+        return D;
+    }
+
+    public ComplexNum[][] getCurMatrix() {
+        return curMatrix;
+    }
+
+    public int getXSize() {
+        return xSize;
+    }
+
+    public ComplexNum determinant() {
+         return determinantOfMatrix(this.getCurMatrix(), this.getXSize());
     }
 
 }
