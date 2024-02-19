@@ -16,5 +16,9 @@ public class Main {
         matrixB.setByIndex(1, 1, new ComplexNum(4.0, 0.0));
         matrixA.subtraction(matrixB);
         System.out.println(matrixA);
+
+        matrixA.transposition();
+        matrixA = matrixA.multiplication(matrixB);
+        System.out.println(matrixA);
     }
 }

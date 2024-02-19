@@ -1,7 +1,7 @@
 public class MatrixDigits {
 
-    Double realPart = 0.0;
-    Double imagPart = 0.0;
+    protected Double realPart = 0.0;
+    protected Double imagPart = 0.0;
 
     @Override
     public String toString() {
